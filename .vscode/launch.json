@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run main.cpp",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/output.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "internalConsole", // Reemplaza externalConsole con console
+            "preLaunchTask": "C/C++: cl.exe build all",
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ]
+}
