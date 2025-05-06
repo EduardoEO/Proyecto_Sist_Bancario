@@ -1,0 +1,16 @@
+idUsuarioRegistrado|nombre completo|dni|contraseña
+1|Juan Peréz|1|1
+2|Maria Lopez|2|2
+
+iban|idUsuarioRegistrado|saldo|tipoCuenta
+ES1234567890123456789011|1|1000.0|0
+ES2345678901234567890122|2|2000.0|1
+ES3456789012345678901233|1|3000.0|3
+
+idTransaccion|ibanOrdenante|ibanBeneficiario|monto|concepto completo|fecha
+1|Maze Bank|ES1740948824551711527614|1111|Ingreso de efectivo|Wed Apr 30 13:46:59 2025
+2|Maze Bank|ES2322168576189279543123|1001|Ingreso de efectivo|Wed Apr 30 13:49:35 2025
+
+nºtarjeta|iban|fechaCaducidad|cvv|tipo|estado|pin
+1234567812345678|ES1234567890123456789011|02/23|123|0|0|123456
+2345678923456789|ES1234567890123456789011|12/25|456|0|0|654321
