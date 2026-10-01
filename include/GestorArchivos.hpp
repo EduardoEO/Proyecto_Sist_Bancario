@@ -5,6 +5,7 @@
 #include "../include/CuentaBancaria.hpp"
 #include "../include/Transaccion.hpp"
 #include "../include/TarjetaBancaria.hpp"
+#include "../include/Seguridad.hpp"
 
 #include <string>
 #include <vector>

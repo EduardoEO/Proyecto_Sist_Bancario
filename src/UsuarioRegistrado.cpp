@@ -29,9 +29,10 @@ void UsuarioRegistrado::setContrasena(string contrasena){
 }
 
 void UsuarioRegistrado::mostrarInformacion(){
+    cout << "ID Usuario: " << getId() << endl;
     cout << "Nombre: " << getNombre() << endl;
     cout << "DNI: " << getDni() << endl;
-    cout << "Contraseña: " << getContrasena() << endl;
+    cout << "Contraseña (Hash SHA-256): " << getContrasena() << endl;
     cout << endl;
 }
 

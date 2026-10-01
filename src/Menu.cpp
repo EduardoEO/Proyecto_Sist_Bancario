@@ -4,6 +4,7 @@
 #include "../include/CuentaBancaria.hpp"
 #include "../include/Transaccion.hpp"
 #include "../include/UsuarioNoRegistrado.hpp"
+#include "../include/Seguridad.hpp"
 
 #include <iostream>
 #include <vector>
@@ -30,6 +31,10 @@ void Menu::mostrarMenuIniSesion(Banco& banco){
         cin >> opcion;
 
         if (cin.fail()){
+            if (cin.eof()){
+                continuar = false;
+                break;
+            }
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Opción inválida. Por favor, ingrese un número." << endl;
@@ -74,8 +79,13 @@ void Menu::iniciarSesion(Banco& banco){
 void Menu::mostrarMenuRegistro(Banco& banco){
     cout << "Ingrese su nombre completo: ";
     string nombre;
-    cin.ignore(); // Limpiar el buffer de entrada.
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar de forma segura todo lo pendiente en el buffer.
     getline(cin, nombre); // Leer el nombre completo del usuario.
+    while (nombre.empty()){
+        if (cin.eof()) return;
+        cout << "El nombre no puede estar vacío. Ingrese su nombre completo: ";
+        getline(cin, nombre);
+    }
     cout << "Ingrese su DNI: ";
     string dni;
     cin >> dni;
@@ -111,6 +121,10 @@ void Menu::mostrarMenuUsuario(Banco& banco){
         cin >> opcion;
 
         if (cin.fail()){
+            if (cin.eof()){
+                continuar = false;
+                break;
+            }
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Opción inválida. Por favor, ingrese un número." << endl;
@@ -122,7 +136,7 @@ void Menu::mostrarMenuUsuario(Banco& banco){
                 mostrarInformacionUsuario(usuario);
                 break;
             case 2:
-                cambiarContrasena(usuario);
+                cambiarContrasena(banco, usuario);
                 break;
             case 3:
                 banco.crearCuentaBancaria(usuario);
@@ -135,10 +149,12 @@ void Menu::mostrarMenuUsuario(Banco& banco){
                     cout << "Ingrese su contraseña: ";
                     string contrasena;
                     cin >> contrasena;
-                    if (contrasena == usuario->getContrasena()){
+                    if (Seguridad::verificarContrasena(contrasena, usuario->getContrasena())){
                         banco.eliminarUsuario(usuario);
                         continuar = false;
                         break;
+                    } else {
+                        cout << "Contraseña incorrecta. Operación cancelada." << endl;
                     }
                 }
                 break;
@@ -162,7 +178,6 @@ void Menu::mostrarInformacionUsuario(UsuarioRegistrado* usuario){
 }
 
 void Menu::cambiarContrasena(UsuarioRegistrado* usuario){
-    cout << "Contraseña actual: " << usuario->getContrasena() << endl;
     cout << "Introduce la nueva contraseña: ";
     string nuevaContrasena;
     cin >> nuevaContrasena;
@@ -170,11 +185,17 @@ void Menu::cambiarContrasena(UsuarioRegistrado* usuario){
     string comparadorContrasena;
     cin >> comparadorContrasena;
     if (nuevaContrasena == comparadorContrasena){
-        usuario->setContrasena(nuevaContrasena);
-        cout << "Contraseña cambiada con éxito." << endl;
+        string nuevoHash = Seguridad::hashContrasena(nuevaContrasena);
+        usuario->setContrasena(nuevoHash);
+        cout << "Contraseña cambiada con éxito y asegurada mediante SHA-256." << endl;
     }else{
         cout << "Las contraseñas no coinciden." << endl;
     }
+}
+
+void Menu::cambiarContrasena(Banco& banco, UsuarioRegistrado* usuario){
+    cambiarContrasena(usuario);
+    banco.guardarDatos();
 }
 
 void Menu::seleccionarCuentaBancaria(Banco& banco, UsuarioRegistrado* usuario){
@@ -216,6 +237,10 @@ void Menu::mostrarMenuPrincipal(Banco& banco, CuentaBancaria* cuentaBancaria){
         cin >> opcion;
 
         if (cin.fail()){
+            if (cin.eof()){
+                continuar = false;
+                break;
+            }
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Opción inválida. Por favor, ingrese un número." << endl;
@@ -436,6 +461,10 @@ void Menu::mostrarMenuTarjetaBancaria(Banco& banco, TarjetaBancaria& tarjetaBanc
             cin >> opcion;
 
             if (cin.fail()){
+                if (cin.eof()){
+                    continuar = false;
+                    break;
+                }
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cout << "Opción inválida. Por favor, ingrese un número." << endl;
@@ -465,6 +494,10 @@ void Menu::mostrarMenuTarjetaBancaria(Banco& banco, TarjetaBancaria& tarjetaBanc
             cin >> opcion;
 
             if (cin.fail()){
+                if (cin.eof()){
+                    continuar = false;
+                    break;
+                }
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cout << "Opción inválida. Por favor, ingrese un número." << endl;
