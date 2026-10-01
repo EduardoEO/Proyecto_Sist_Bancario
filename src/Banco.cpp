@@ -5,6 +5,7 @@
 #include "../include/Transaccion.hpp"
 #include "../include/TarjetaBancaria.hpp"
 #include "../include/GestorArchivos.hpp"
+#include "../include/Seguridad.hpp"
 
 #include <iostream>
 #include <vector>
@@ -157,7 +158,7 @@ void Banco::guardarDatos(){
 // Métodos
 UsuarioRegistrado* Banco::iniciarSesion(const string& dni, const string& contrasena){ // const evita modificar los valores y & pasamos la referencia para evitar duplicar el objeto.
     for (UsuarioRegistrado& usuario : usuariosRegistrados){
-        if (usuario.getDni() == dni && usuario.getContrasena() == contrasena){
+        if (usuario.getDni() == dni && Seguridad::verificarContrasena(contrasena, usuario.getContrasena())){
             usuarioAutenticado = &usuario; // Guardamos el usuario autenticado en el atributo de la clase.
             return &usuario; // Devolvemos la referencia al usuario registrado que ha iniciado sesión en vez de una copia.
         }
@@ -174,10 +175,26 @@ void Banco::registrarUsuario(UsuarioNoRegistrado& usuarioNoRegistrado){
             return;
         }
     }
-    // Si no está el DNI registrado, ya podemos registrar al usuario.
-    usuariosRegistrados.emplace_back(usuariosRegistrados.size() + 1, usuarioNoRegistrado.getNombre(), usuarioNoRegistrado.getDni(), usuarioNoRegistrado.getContrasena());
-    cout << "Usuario registrado con éxito" << endl;
 
+    // Calcular el siguiente ID de forma segura para evitar colisiones si se borraron usuarios previos
+    int nuevoId = 1;
+    for (UsuarioRegistrado& usuario : usuariosRegistrados){
+        if (usuario.getId() >= nuevoId){
+            nuevoId = usuario.getId() + 1;
+        }
+    }
+
+    // Hashear la contraseña mediante SHA-256 antes de guardarla en memoria y en disco
+    string passHash = Seguridad::hashContrasena(usuarioNoRegistrado.getContrasena());
+
+    // Si no está el DNI registrado, ya podemos registrar al usuario.
+    usuariosRegistrados.emplace_back(nuevoId, usuarioNoRegistrado.getNombre(), usuarioNoRegistrado.getDni(), passHash);
+    
+    // Guardar inmediatamente en el archivo de texto para garantizar persistencia y evitar pérdidas
+    GestorArchivos gestorArchivos;
+    gestorArchivos.guardarUsuarios(usuariosRegistrados);
+
+    cout << "Usuario registrado con éxito. ID asignado: " << nuevoId << endl;
 }
 
 UsuarioRegistrado* Banco::buscarUsuario(int id){ // Devuelve un puntero a un usuario registrado en vez de una copia del objeto.
@@ -244,6 +261,14 @@ void Banco::crearCuentaBancaria(UsuarioRegistrado* usuario){
     usuario->agregarCuentaBancaria(*nuevaCuentaBancaria);
     cuentasBancarias.push_back(nuevaCuentaBancaria);
     
+    // Guardar inmediatamente las cuentas actualizadas
+    vector<CuentaBancaria> cuentas;
+    for (CuentaBancaria* c : cuentasBancarias) {
+        if (c) cuentas.push_back(*c);
+    }
+    GestorArchivos gestorArchivos;
+    gestorArchivos.guardarCuentas(cuentas);
+
     cout << "Cuenta bancaria creada con éxito" << endl;
     cout << "IBAN: " << IBAN << endl;
 }
@@ -412,6 +437,10 @@ void Banco::crearTarjetaBancaria(CuentaBancaria* cuentaBancaria) {
     // Asociar la tarjeta al banco
     tarjetasBancarias.push_back(nuevaTarjeta);
 
+    // Guardar inmediatamente las tarjetas actualizadas
+    GestorArchivos gestorArchivos;
+    gestorArchivos.guardarTarjetas(tarjetasBancarias);
+
     cout << "Tarjeta creada con éxito." << endl;
     cout << "Número de tarjeta: " << numeroTarjeta << endl;
     cout << "Fecha de caducidad: " << fechaCaducidad << endl;
@@ -434,6 +463,12 @@ void Banco::eliminarCuenta(CuentaBancaria* cuenta){
         delete *it; // Liberar la memoria de la cuenta
         cuentasBancarias.erase(it); // Eliminar la cuenta del vector
     }
+    vector<CuentaBancaria> cuentas;
+    for (CuentaBancaria* c : cuentasBancarias) {
+        if (c) cuentas.push_back(*c);
+    }
+    GestorArchivos gestorArchivos;
+    gestorArchivos.guardarCuentas(cuentas);
 }
 
 void Banco::eliminarUsuario(UsuarioRegistrado* usuario){
@@ -476,6 +511,12 @@ void Banco::eliminarUsuario(UsuarioRegistrado* usuario){
     GestorArchivos gestorArchivos;
     gestorArchivos.guardarUsuarios(usuariosRegistrados); // Guardar los usuarios restantes en el archivo.
     gestorArchivos.guardarTarjetas(tarjetasBancarias); // Guardar las tarjetas restantes en el archivo.
+    
+    vector<CuentaBancaria> cuentas;
+    for (CuentaBancaria* c : cuentasBancarias) {
+        if (c) cuentas.push_back(*c);
+    }
+    gestorArchivos.guardarCuentas(cuentas); // Guardar las cuentas restantes en el archivo.
     
     cout << "Usuario eliminado con éxito." << endl;
 }

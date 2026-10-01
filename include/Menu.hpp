@@ -17,6 +17,7 @@ class Menu {
     void mostrarMenuUsuario(Banco& banco);
     void mostrarInformacionUsuario(UsuarioRegistrado* usuario);
     void cambiarContrasena(UsuarioRegistrado* usuario);
+    void cambiarContrasena(Banco& banco, UsuarioRegistrado* usuario);
     void seleccionarCuentaBancaria(Banco& banco, UsuarioRegistrado* usuario);
     void mostrarMenuPrincipal(Banco& banco, CuentaBancaria* cuentaBancaria);
     void mostrarHistorialTransacciones(Banco& banco, CuentaBancaria* cuentaBancaria);
@@ -27,7 +28,5 @@ class Menu {
     void cambiarPIN(TarjetaBancaria& tarjetaBancaria);
     void renovarTarjetaBancaria(Banco& banco, TarjetaBancaria& tarjetaBancaria);
 };
-
-
 
 #endif // MENU_HPP

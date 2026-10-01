@@ -1,0 +1,27 @@
+# ===============================
+# Binarios y archivos de compilación C++
+# ===============================
+build/obj/*
+!build/obj/.gitkeep
+build/*.pdb
+build/*.ilk
+vc140.pdb
+*.obj
+*.pdb
+*.ilk
+
+# ===============================
+# Documentos y recursos multimedia
+# ===============================
+*.docx
+*.doc
+*.png
+
+# ===============================
+# Archivos temporales de sistema e IDE
+# ===============================
+.vscode/ipch/
+*.tmp
+*.log
+.DS_Store
+Thumbs.db

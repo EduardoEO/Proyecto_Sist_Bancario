@@ -5,11 +5,14 @@
             "label": "C/C++: cl.exe build all",
             "command": "cl.exe",
             "args": [
+                "/std:c++17",
                 "/Zi",
                 "/EHsc",
                 "/nologo",
-                "/Fe${workspaceFolder}\\build\\output.exe",
-                "${workspaceFolder}\\src\\*.cpp"
+                "/Fo.\\build\\obj\\",
+                "/Fd.\\build\\output.pdb",
+                "/Fe.\\build\\output.exe",
+                "src\\*.cpp"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -21,7 +24,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Compiles all .cpp files in the src folder."
+            "detail": "Compila todos los archivos .cpp colocando los .obj en build/obj/ y el .exe en build/."
         }
     ],
     "version": "2.0.0"
